@@ -8,6 +8,12 @@ The AWS SDK is fine, but we want to give user tokens a lot more granular control
 
 ## How do I set this up?
 
+Contenttruck can be downloaded from the Docker image hub at `ghcr.io/webscalesoftwareltd/contenttruck:latest`. You can also specify a version tag or commit hash that has been committed to main.
+
+```
+$ docker pull ghcr.io/webscalesoftwareltd/contenttruck:latest
+```
+
 To launch the app, you will need to setup your configuration. This can be done in one of two ways:
 - Create a `~/.contenttruck.json`: You can set the following properties:
     - "secret_access_key": This is your AWS secret access key.
@@ -34,3 +40,19 @@ Contenttruck is intended to be interaacted with using SDK's. You probably don't 
 - Make a POST request to `/_contenttruck` with `X-Type` set to the name of a public function hooked to `apiServer` in `httpserver/api_handlers.go`.
 - The request object is the second argument to the function, and the response object is the first output parameter. Note that if there is only 1 output parameter, it can only error or return a 204.
 - Most request types require the body to be `Content-Type: application/json`, but for `Upload` specifically, since the body is consumed, you can use `X-Json-Body` to pass the JSON body as a string.
+
+## Options in Rule Set
+
+When using `CreatePartition`, you need to specify a rule set string that contains comma-separated options. Here are the possible options:
+
+- `prefix`: specifies the path prefix that partitions will match.
+- `exact`: specifies the exact path that partitions will match.
+- `max-size`: specifies the maximum size of files that partitions will match.
+- `ensure`: specifies a validation string that partitions must satisfy. This will be passed to the validation engine which supports these options separated by plus signs:
+  - `X:Y`: specifies this has to be a image with a aspect ratio of X:Y.
+  - `jpeg` or `jpg`: specifies this has to be a jpeg image.
+  - `png`: specifies this has to be a png image.
+  - `svg`: specifies this has to be a svg image.
+- (invalid rule): any rule that is not one of the above options will result in an `ErrorCodeInvalidRuleSet` being returned.
+
+The `CreatePartition` function is parsing the rule set using a switch statement to determine the rule and set the appropriate fields in the `db.Partition` struct
