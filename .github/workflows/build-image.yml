@@ -36,3 +36,4 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ steps.repo_owner.outputs.lowercase }}/contenttruck:${{ github.sha }}
+          platforms: linux/amd64,linux/arm64
