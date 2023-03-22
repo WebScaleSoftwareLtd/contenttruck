@@ -8,6 +8,8 @@ The AWS SDK is fine, but we want to give user tokens a lot more granular control
 
 ## How do I set this up?
 
+Firstly, run `schema.sql` on your Postgres database. This will create the tables that contenttruck uses.
+
 Contenttruck can be downloaded from the Docker image hub at `ghcr.io/webscalesoftwareltd/contenttruck:latest`. You can also specify a version tag or commit hash that has been committed to main.
 
 ```
