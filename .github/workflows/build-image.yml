@@ -39,7 +39,7 @@ jobs:
       - name: Add additional image tags for release
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          echo "IMAGE_TAGS=${IMAGE_TAGS},ghcr.io/${{ steps.repo_owner.outputs.lowercase }}/contenttruck:${{ github.event.release.tag_name }},ghcr.io/${{ steps.repo_owner.outputs.lowercase }}/contenttruck:latest" >> $GITHUB_ENV
+          echo "IMAGE_TAGS=${IMAGE_TAGS},ghcr.io/${{ steps.repo_owner.outputs.lowercase }}/contenttruck:${{ github.ref_name }},ghcr.io/${{ steps.repo_owner.outputs.lowercase }}/contenttruck:latest" >> $GITHUB_ENV
 
       - name: Build and push image
         uses: docker/build-push-action@v2
