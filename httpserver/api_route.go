@@ -99,7 +99,7 @@ func (s *Server) api(w http.ResponseWriter, r *http.Request) {
 				Code:    ErrorCodeInternalServerError,
 				Message: "Internal Server Error",
 			}, http.StatusInternalServerError)
-			_, _ = fmt.Fprintf(os.Stderr, "Error encoding JSON: %s", err.Error())
+			_, _ = fmt.Fprintf(os.Stderr, "Error encoding JSON: %s\n", err.Error())
 			return
 		}
 
@@ -126,7 +126,7 @@ func (s *Server) api(w http.ResponseWriter, r *http.Request) {
 			}, http.StatusInternalServerError)
 
 			// Log the error.
-			_, _ = fmt.Fprintf(os.Stderr, "Panic: %s", r)
+			_, _ = fmt.Fprintf(os.Stderr, "Panic: %s\n", r)
 		}
 	}()
 

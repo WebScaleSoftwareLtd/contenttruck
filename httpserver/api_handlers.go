@@ -76,7 +76,7 @@ type apiServer struct {
 func (s *apiServer) getKeys(ctx context.Context, key string) (partitions []*db.Partition, err *APIError) {
 	partitions, e1 := s.s.DB.GetPartitionsByKey(ctx, key)
 	if e1 != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error getting partitions: %s", e1)
+		_, _ = fmt.Fprintf(os.Stderr, "Error getting partitions: %s\n", e1)
 		return nil, &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -161,7 +161,7 @@ func (s *apiServer) Upload(r *http.Request, req *UploadRequest) (*UploadResponse
 			}
 		}
 
-		_, _ = fmt.Fprintf(os.Stderr, "Error writing to partition usage pool: %s", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error writing to partition usage pool: %s\n", e2)
 		return nil, &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -173,7 +173,7 @@ func (s *apiServer) Upload(r *http.Request, req *UploadRequest) (*UploadResponse
 		if rollback {
 			err := s.s.DB.RollbackPartitionUsagePool(context.Background(), partition.Name, uint32(r.ContentLength))
 			if err != nil {
-				_, _ = fmt.Fprintf(os.Stderr, "Error rolling back partition usage pool: %s", err)
+				_, _ = fmt.Fprintf(os.Stderr, "Error rolling back partition usage pool: %s\n", err)
 			}
 		}
 	}()
@@ -211,7 +211,7 @@ func (s *apiServer) Upload(r *http.Request, req *UploadRequest) (*UploadResponse
 		ACL:         &acl,
 	})
 	if e2 != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error uploading to S3: %s", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error uploading to S3: %s\n", e2)
 		return nil, &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -222,7 +222,7 @@ func (s *apiServer) Upload(r *http.Request, req *UploadRequest) (*UploadResponse
 	// Write the file to the database.
 	e2 = s.s.DB.WritePartitionFile(r.Context(), partition.Name, p)
 	if e2 != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error writing partition file: %s", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error writing partition file: %s\n", e2)
 		return nil, &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -297,7 +297,7 @@ func (s *apiServer) Delete(r *http.Request, req *DeleteRequest) *APIError {
 		}
 
 		// Otherwise, return a 500.
-		_, _ = fmt.Fprintf(os.Stderr, "Error stating in S3: %s", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error stating in S3: %s\n", e2)
 		return &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -311,7 +311,7 @@ func (s *apiServer) Delete(r *http.Request, req *DeleteRequest) *APIError {
 		Key:    &p,
 	})
 	if e2 != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error deleting from S3: %s", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error deleting from S3: %s\n", e2)
 		return &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -322,7 +322,7 @@ func (s *apiServer) Delete(r *http.Request, req *DeleteRequest) *APIError {
 	// Delete the file from the database.
 	e2 = s.s.DB.DeletePartitionFile(r.Context(), partition.Name, p)
 	if e2 != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error deleting partition file: %s", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error deleting partition file: %s\n", e2)
 		return &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -333,7 +333,7 @@ func (s *apiServer) Delete(r *http.Request, req *DeleteRequest) *APIError {
 	// Reclaim from the usage pool.
 	e2 = s.s.DB.RollbackPartitionUsagePool(r.Context(), partition.Name, uint32(*st.ContentLength))
 	if e2 != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error rolling back usage pool: %s", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error rolling back usage pool: %s\n", e2)
 		return &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -391,7 +391,7 @@ func (s *apiServer) CreateKey(r *http.Request, req *CreateKeyRequest) (*CreateKe
 	// Insert the key.
 	e2 := s.s.DB.InsertKey(r.Context(), key, req.Partitions)
 	if e2 != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error inserting key: %s", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error inserting key: %s\n", e2)
 		return nil, &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -420,7 +420,7 @@ func (s *apiServer) DeleteKey(r *http.Request, req *DeleteKeyRequest) *APIError 
 	// Delete the key.
 	e2 := s.s.DB.DeleteKey(r.Context(), req.Key)
 	if e2 != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error deleting key: %s", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error deleting key: %s\n", e2)
 		return &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -482,6 +482,13 @@ func parseSize(s string) (uint32, error) {
 	}
 }
 
+func removeSlash(s string) string {
+	if len(s) > 0 && s[len(s)-1] == '/' {
+		return s[:len(s)-1]
+	}
+	return s
+}
+
 // CreatePartition is used to create a new partition.
 func (s *apiServer) CreatePartition(r *http.Request, req *CreatePartitionRequest) *APIError {
 	// Validate the sudo key.
@@ -521,9 +528,9 @@ func (s *apiServer) CreatePartition(r *http.Request, req *CreatePartitionRequest
 		// Switch on the rule.
 		switch equalsSplit[0] {
 		case "prefix":
-			p.PathPrefix = equalsSplit[1]
+			p.PathPrefix = removeSlash(equalsSplit[1])
 		case "exact":
-			p.PathPrefix = equalsSplit[1]
+			p.PathPrefix = removeSlash(equalsSplit[1])
 			p.Exact = true
 		case "max-size":
 			maxSize, e2 := parseSize(equalsSplit[1])
@@ -577,7 +584,7 @@ func (s *apiServer) CreatePartition(r *http.Request, req *CreatePartitionRequest
 				Message: "Partition already exists",
 			}
 		}
-		_, _ = fmt.Fprintf(os.Stderr, "Error creating partition: %v", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error creating partition: %v\n", e2)
 		return &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,
@@ -628,7 +635,7 @@ func (s *apiServer) DeletePartition(r *http.Request, req *DeletePartitionRequest
 				Key:    aws.String(path),
 			})
 			if e2 != nil {
-				_, _ = fmt.Fprintf(os.Stderr, "Error deleting file: %s", e2)
+				_, _ = fmt.Fprintf(os.Stderr, "Error deleting file: %s\n", e2)
 			}
 		}()
 		return nil
@@ -644,7 +651,7 @@ func (s *apiServer) DeletePartition(r *http.Request, req *DeletePartitionRequest
 
 	// Handle any errors.
 	if e2 != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error deleting partition files: %s", e2)
+		_, _ = fmt.Fprintf(os.Stderr, "Error deleting partition files: %s\n", e2)
 		return &APIError{
 			status:  http.StatusInternalServerError,
 			Code:    ErrorCodeInternalServerError,

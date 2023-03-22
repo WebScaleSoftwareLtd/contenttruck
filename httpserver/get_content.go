@@ -72,7 +72,7 @@ func (s *Server) getContent(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("Internal Server Error"))
-		_, _ = fmt.Fprintf(os.Stderr, "Error getting object %s from S3: %s", bucketKey, err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "Error getting object %s from S3: %s\n", bucketKey, err.Error())
 		return
 	}
 
@@ -100,7 +100,7 @@ func (s *Server) getContent(w http.ResponseWriter, r *http.Request) {
 			// Return a bad request.
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = w.Write([]byte("Could not load as image"))
-			_, _ = fmt.Fprintf(os.Stderr, "Error decoding image %s: %s", bucketKey, err.Error())
+			_, _ = fmt.Fprintf(os.Stderr, "Error decoding image %s: %s\n", bucketKey, err.Error())
 			return
 		}
 

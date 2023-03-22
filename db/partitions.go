@@ -74,7 +74,7 @@ func (d *DB) WriteToPartitionUsagePool(ctx context.Context, name string, size ui
 // RollbackPartitionUsagePool updates a partition's usage pool with the data removed.
 func (d *DB) RollbackPartitionUsagePool(ctx context.Context, name string, size uint32) error {
 	const query = "UPDATE partitions_usage SET size = size - $1 WHERE name = $2 AND size >= $1"
-	_, err := d.conn.Exec(ctx, query, name, size)
+	_, err := d.conn.Exec(ctx, query, size, name)
 	return err
 }
 
