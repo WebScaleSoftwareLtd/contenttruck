@@ -37,3 +37,9 @@ jobs:
           push: true
           tags: ghcr.io/${{ steps.repo_owner.outputs.lowercase }}/contenttruck:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
+
+      - name: Tag as latest if version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          docker tag ghcr.io/${{ steps.repo_owner.outputs.lowercase }}/contenttruck:${{ github.sha }} ghcr.io/${{ steps.repo_owner.outputs.lowercase }}/contenttruck:latest
+          docker push ghcr.io/${{ steps.repo_owner.outputs.lowercase }}/contenttruck:latest
