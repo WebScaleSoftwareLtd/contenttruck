@@ -139,6 +139,8 @@ func (s *Server) api(w http.ResponseWriter, r *http.Request) {
 	}
 	if resp == nil {
 		// No response.
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
