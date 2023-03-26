@@ -15,6 +15,24 @@ type Partition struct {
 	Validates  string
 }
 
+// Join is used to join a path to a partition.
+func (p *Partition) Join(relPath string) string {
+	if !p.Exact && relPath != "" {
+		root := p.PathPrefix
+		if !strings.HasSuffix(root, "/") {
+			root += "/"
+		}
+		if strings.HasPrefix(relPath, "/") {
+			relPath = relPath[1:]
+		}
+		if strings.HasPrefix(root, "/") {
+			root = root[1:]
+		}
+		return root + relPath
+	}
+	return p.PathPrefix
+}
+
 const partitionByKey = `
 	SELECT partitions.name, partitions.max_size, partitions.path_prefix, partitions.exact, partitions.validates
 		FROM keys INNER JOIN partitions ON

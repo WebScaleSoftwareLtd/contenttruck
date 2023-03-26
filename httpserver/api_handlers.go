@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -134,11 +133,7 @@ func (s *apiServer) Upload(r *http.Request, req *UploadRequest) (*UploadResponse
 	}
 
 	// Create the path based on the partition information.
-	p := partition.PathPrefix
-	if !partition.Exact && req.RelativePath != "" {
-		// Join the path.
-		p = path.Join(p, req.RelativePath)
-	}
+	p := partition.Join(req.RelativePath)
 
 	// Check Content-Length is present.
 	if r.ContentLength == -1 {
@@ -273,11 +268,7 @@ func (s *apiServer) Delete(r *http.Request, req *DeleteRequest) *APIError {
 	}
 
 	// Create the path based on the partition information.
-	p := partition.PathPrefix
-	if !partition.Exact && req.RelativePath != "" {
-		// Join the path.
-		p = path.Join(p, req.RelativePath)
-	}
+	p := partition.Join(req.RelativePath)
 
 	// Stat the file from S3.
 	st, e2 := s.s.S3.HeadObject(&s3.HeadObjectInput{
